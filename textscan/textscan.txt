@@ -1,0 +1,36 @@
+
+TEXTSCAN
+========
+
+This program scans the text files specified and reports on various
+unusual aspects of those files. In particular, it notes odd control
+characters and non ASCII characters (ie characters with their most
+significant bits set), white space at the end of lines, and an
+"unterminated" line at the end of the file.
+
+This program assumes that a "proper" text file contains only ASCII 0x20
+to 0x7E, '\n' (newline), and '\t' (tab) characters. If any other
+characters appear in the file, they are noted. The program takes no
+corrective action of any kind; the input file(s) are not changed.
+
+Under MS-DOS, the program will take the CR/LF pair at the end of each
+line to be a single "new line" character (the program was written in C).
+Thus the total number of characters found, as shown in the summary
+report, will be less than the number of bytes in the file, as shown in
+the directory listing. If there is a large difference, it implies that a
+^Z was found in the file before the true end of file.
+
+The program was designed to scan whole groups of files. Thus it accepts
+wildcards on the command line. The name of each file is echoed to the
+output so that a meaningful report can be generated using I/O
+redirection.
+
+          Usage:
+          textscan infile [infile...]
+
+The program is in the public domain. I, the author do, however, welcome
+comments and suggestions about the program. I can be reached as in:
+
+          Peter Chapin
+          P.O. Box 317
+          Randolph Center, VT 05061

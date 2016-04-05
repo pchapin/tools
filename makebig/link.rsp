@@ -1,0 +1,17 @@
+############################################################################
+# FILE        : link.rsp
+# LAST REVISED: 2005-07-31
+# AUTHOR      : Peter C. Chapin
+#
+# This is the linker response file for the makebig program. This file
+# uses Open Watcom syntax (in cases where it makes a difference).
+############################################################################
+
+system nt
+name makebig.exe
+option q
+libpath %WATCOM%\lib386
+libpath %WATCOM%\lib386\nt
+library clib3r.lib
+file makebig.obj
+file get_switch.obj

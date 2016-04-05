@@ -1,0 +1,413 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                      SCR
+                                  Version 1.1
+                       Low Level Screen Handling Package
+                       =================================
+
+                      (C) Copyright 1990 by Peter Chapin
+
+                          Revision: February 4, 1991
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+          Peter Chapin
+          P.O. Box 317
+          Randolph Center, VT 05061
+
+
+
+
+
+
+     SCR Documentation                                     February 4, 1991
+
+
+
+                                 Introduction
+                                 ------------
+
+     This  package   provides  a   number  of  low  level  screen  handling
+     functions. The functions are suitable for  dealing with  a "text mode"
+     screen where  the screen  is divided into character positions. This is
+     not a graphics package.  Functions are  provided for  both reading the
+     screen as  well as  writing to  the screen. Functions are provided for
+     dealing  with  strings  as  well  as  blocks.  Finally,  functions are
+     provided to  move the  cursor, change the cursor shape, and select one
+     of several video pages.
+
+
+                                   Features
+                                   --------
+
+       *  High speed.
+
+       *  Works with MDA, Hercules, CGA, EGA, and VGA adaptors.
+
+       *  Multi page text mode (25 rows, 80 columns) operation.
+
+       *  Understands color. Will do internal translations to support
+          monochrome monitors.
+
+       *  Allows flexible access to text and color attributes separately.
+
+       *  Can manipulate any portion of the screen without having to move
+          the cursor.
+
+       *  Can do basic cursor manipulations. Useful when mixing direct I/O
+          with "standard" I/O functions.
+
+
+                               Design Philosophy
+                               -----------------
+
+     SCR was designed to be a high performance screen handling  package. To
+     enhance speed,  the functions  do no significant error checking. It is
+     YOUR responsibility to insure that the data sent to these functions is
+     meaningful. The behavior is undefined if you provide invalid arguments
+     to these functions.
+
+     The implementation of these  functions is  machine dependent;  they do
+     direct  access  to  the  video  hardware.  As  a  result  there may be
+     difficulties  when  programs  that  use  this  package  are  ported to
+     "unusual" environments.  The use  of direct video access should always
+     be done with caution and after careful consideration. 
+
+                                                                          1
+
+
+
+
+
+     SCR Documentation                                     February 4, 1991
+
+
+
+                            Defining Screen Regions
+                            -----------------------
+
+     The upper left corner of the  screen is  row 1,  column 1.  Rows range
+     from 1  to 25.  Columns range from 1 to 80. A screen region is defined
+     by specifying the row and column  of  the  upper  left  corner  of the
+     region followed by the size of the region. The size is always given as
+     the width in columns followed by the height in rows.
+
+     The functions are guaranteed  to work  only for  regions sized between
+     1x1 and  the entire screen. Do not attempt to use them on a zero sized
+     region. Do  not specify  dimensions that  overlap any  of the screen's
+     edges or that have negative sizes.
+
+
+                          Defining Screen Attributes
+                          --------------------------
+
+     A  screen  attribute  (ie  color)  is  specified by ORing together the
+     following symbols.
+
+          SCR_WHITE           SCR_REV_WHITE
+          SCR_BLACK           SCR_REV_BLACK
+          SCR_RED             SCR_REV_RED
+          SCR_GREEN           SCR_REV_GREEN
+          SCR_BLUE            SCR_REV_BLUE
+          SCR_CYAN            SCR_REV_CYAN
+          SCR_MAGENTA         SCR_REV_MAGENTA
+          SCR_BROWN           SCR_REV_BROWN
+
+          SCR_BLINK
+          SCR_BRIGHT
+
+     Foreground  colors  are  specified   using  the   first  column  while
+     background colors  are specified using the second column. Black is the
+     default color. Thus you  can specify  only a  foreground color  if you
+     want the background to be black (or visa versa).
+
+     The 8  bits of the attribute are composed of 3 bits for the foreground
+     color, 3 bits for the background color, and 1 bit  each for  the blink
+     and the  bright attribute.  Each color is really just a combination of
+     the 3 primitive colors red, green, and blue. Each primitive  color has
+     one bit associated with it.
+
+     A color  (or blink  or bright)  is activated  when it's bit is ON. For
+     example, SCR_MAGENTA  is really  just SCR_RED  | SCR_BLUE  -- both red
+     and blue  bits ON.  Similarly SCR_WHITE  is just SCR_RED | SCR_GREEN |
+     SCR_BLUE -- all three bits ON.
+
+                                                                          2
+
+
+
+
+
+     SCR Documentation                                     February 4, 1991
+
+
+     Although attribute parameters are generally declared as int,  only the
+     lower 8  bits of  the int  (the unsigned char part) is used. Note that
+     when the attributes are  stored in  the arrays  used by  ScrRead() and
+     ScrWrite(), they are stored as plain char. 
+
+
+                              Available Functions
+                              -------------------
+
+
+     void ScrInitialize(void);
+          This function  must be called before any other function from this
+          package is used. It causes the screen to clear and  the cursor to
+          be moved to the home position.
+
+          This function  can be  called several times. All additional times
+          will be ignored (unless  there  has  been  a  ScrTerminate() call
+          between them).
+
+     void ScrTerminate(void);
+          This function  must be  called before  the program exits. Once it
+          has been called, no other function from this package can  be used
+          (except  ScrInitialize()).  This  function  causes  the screen to
+          clear and the cursor to be moved to the home position.
+
+          This function can be called several  times. All  additional times
+          will  be  ignored  (unless  there has been a ScrInitialize() call
+          between them).
+
+     boolean ScrIsMonochrome(void);
+          This  function  returns  YES  if  a  monochrome  monitor  (MDA or
+          Hercules) is  being used;  otherwise, it returns NO. Although the
+          functions in this package  do  color  conversions  for monochrome
+          monitors in  most cases  automatically, it is sometimes desirable
+          to handle color in a special way for monochrome screens.
+
+          ScrInitialize() must have been called before the result from this
+          function is reliable.
+
+     unsigned ScrSegmentAddress(void);
+          This function returns the segment address of the currently active
+          video page. The first byte on the video  page is  at offset zero.
+          This function  allows you to write additional direct video access
+          functions without worrying about the color/monochrome question or
+          which video  page is  currently being  used. Use of this function
+          does, however, bring IBM PC specific concepts into your program.
+
+          ScrInitialize() must have been called before the result from this
+          function is reliable.
+
+                                                                          3
+
+
+
+
+
+     SCR Documentation                                     February 4, 1991
+
+
+     int ScrCvtAttr(int Attribute);
+          This  function  converts  a  color  attribute  into  a monochrome
+          attribute  that  "simulates"  the  color.  In   general,  if  the
+          background color is black, the result from this function is white
+          on black. If the background color is not  black, the  result from
+          this function is reverse video.
+
+          This function  has no  direct effect on the screen. Additionally,
+          many of the SCR functions call  this function  automatically if a
+          monochrome screen  is being  used. You  should rarely have to use
+          this function directly.
+
+     int ScrReverseAttr(int Attribute);
+          This  function  returns  an  attribute  with  the  foreground and
+          background colors  reversed. There  is no  effect on the blink or
+          bright bits of the attribute.
+
+     void ScrRead(int Row, int Col, int Width, int Height, char *Buffer);
+          This function saves the data  on  the  screen  in  the  region of
+          memory pointed  at by 'Buffer'. Both text and attribute bytes are
+          saved. The buffer must  be  large  enough  (twice  the  number of
+          character positions  in the  specified region). The buffer is not
+          null terminated. The data is put  into the  buffer with  the text
+          characters  and  their  attribute bytes alternating. In addition,
+          the data is put into the buffer in row major order. 
+
+     void ScrWrite(int Row, int Col, int Width, int Height, char *Buffer);
+          This function is the inverse of ScrRead(). If the buffer  was not
+          filled from ScrRead(), you should insure that the attribute bytes
+          are appropriate in case a monochrome  screen is  being used. Call
+          ScrCvtAttr() for each attribute byte in the array.
+
+     void ScrReadText(int Row, int Col, int Width, int Height, char *Buf);
+          This  function  behaves  exactly  as  ScrRead()  except  that the
+          attribute bytes  are  not  read.  Only  the  text  characters are
+          placed into  the buffer.  The buffer  is not null terminated. The
+          buffer only needs to  contain  as  many  characters  as character
+          positions on the screen.
+
+     void ScrWriteText(int Row, int Col, int Width, int Height, char *Buf);
+          This  function  behaves  exactly  as  ScrWrite()  except that the
+          attribute bytes already on the screen are not changed. It  is the
+          inverse of ScrReadText().
+
+     void ScrPrint(int Row, int Col, char *String, int Attr, int Count);
+          This  function  prints  a  null terminated string onto the screen
+          starting at the specified position. The  string is  printed using
+          the specified  attribute. The parameter 'Count' limits the number
+          of  characters  printed.  The  position  of  the  cursor  is  not
+
+                                                                          4
+
+
+
+
+
+     SCR Documentation                                     February 4, 1991
+
+          important.
+
+     void ScrPrintText(int Row, int Col, char *String, int Count);
+          This function behaves exactly like ScrPrint() except that it uses
+          the attribute bytes already on the screen.
+
+     void ScrClear(int Row, int Col, int Width, int Height, int Attribute);
+          The foreground color used in the attribute has  no obvious effect
+          from this  function's point  of view.  However, if  text is later
+          written  on  the   cleared   portion   using   ScrWriteText()  or
+          ScrPrintText(), the  text will appear in the specified foreground
+          color.
+
+     void ScrScroll(
+       int Direction,
+       int Row, int Col, int Width, int Height,
+       int Nmbr_Rows, int Attribute
+       );
+          This function scrolls the specified  region  of  the  screen. The
+          parameter 'Direction'  is either  SCR_UP or SCR_DOWN. The cleared
+          space at the bottom or top  of  the  region  is  filled  with the
+          specified attribute.  If the  number of  rows scrolled is greater
+          than or equal to the height, the effect is to clear the region.
+
+     int ScrNmbrPages(void);
+          This function returns the number of  video pages  that the system
+          can handle.  It will  return one  for all  monochrome systems and
+          four for all color systems. 
+
+     int ScrGetPageNmbr(void);
+          This  function  returns  the  page  number  (zero  based)  of the
+          currently active video page.
+
+     void ScrSetPageNmbr(int Page_Nmbr);
+          This function  selects the  currently active  page. Do not use an
+          out of bounds number!
+
+          All other functions in this package only manipulate the currently
+          active (ie  displayed) page. The current version of SCR gives you
+          no direct access to pages that are not being displayed.
+
+     void ScrSetCursorPos(int  Row, int  Column);
+     void ScrGetCursorPos(int *Row, int *Column);
+          These function allow you to get and set the cursor position.
+
+     void ScrSetCursorSize(int Start_Line, int End_Line);
+          This function allows you to adjust  the  size  of  the  cursor so
+          that, for  example, you  could make  it into a block, half block,
+          etc.
+
+
+                                                                          5
+
+
+
+
+
+                                         SCR
+                                Quick Reference Card
+                                ====================
+     Screen Regions:
+     ---------------
+          Row                 Row number (1..25) of upper left corner.
+          Col                 Column number (1..80) of upper left corner.
+          Width               Width of region in columns.
+          Height              Height of region in rows.
+     Regions from 1x1 to full screen  supported. No  negative sizes.  No regions
+     that overlap screen boundaries.
+
+     Color Attributes:
+     -----------------
+          SCR_WHITE           SCR_REV_WHITE
+          SCR_BLACK           SCR_REV_BLACK
+          SCR_RED             SCR_REV_RED
+          SCR_GREEN           SCR_REV_GREEN
+          SCR_BLUE            SCR_REV_BLUE
+          SCR_CYAN            SCR_REV_CYAN
+          SCR_MAGENTA         SCR_REV_MAGENTA
+          SCR_BROWN           SCR_REV_BROWN
+                    SCR_BLINK
+                    SCR_BRIGHT
+
+          Default is SCR_BLACK|SCR_REV_BLACK.
+
+     Available Functions:
+     --------------------
+     void ScrInitialize(void);
+     void ScrTerminate(void);
+     boolean ScrIsMonochrome(void);
+     unsigned ScrSegmentAddress(void);
+     int ScrCvtAttr(int Attr);
+     int ScrReverseAttr(int Attr);
+     void ScrRead(int Row, int Col, int Width, int Height, char *Buf);
+     void ScrWrite(int Row, int Col, int Width, int Height, char *Buf);
+     void ScrReadText(int Row, int Col, int Width, int Height, char *Buf);
+     void ScrWriteText(int Row, int Col, int Width, int Height, char *Buf);
+     void ScrPrint(int Row, int Col, char *String, int Attr, int Count);
+     void ScrPrintText(int Row, int Col, char *String, int Count);
+     void ScrClear(int Row, int Col, int Width, int Height, int Attr);
+     void ScrScroll(
+       int Direction,    /* Either SCR_UP or SCR_DOWN */
+       int Row, int Col, int Width, int Height,
+       int Nmbr_Rows, int Attr
+       );
+     int ScrNmbrPages(void);
+     int ScrGetPageNmbr(void);
+     void ScrSetPageNmbr(int New_Nmbr);
+     void ScrSetCursorPos(int Row, int Col);
+     void ScrGetCursorPos(int *Row, int *Col);
+     void ScrSetCursorSize(int Start_Line, int End_Line);
+
+

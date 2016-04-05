@@ -1,0 +1,22 @@
+
+# Win32 compiler command.
+.cpp.obj:
+        wpp386 $*
+
+OBJS = get_switch.obj upgrade.obj
+
+upgrade.exe:     $(OBJS)
+        wlink @link.w32
+
+clean:
+	del *.obj
+	del *~
+	del upgrade.exe
+	del upgrade.map
+
+#############################################################################
+# Module dependencies
+
+get_switch.obj: get_switch.cpp get_switch.hpp
+
+upgrade.obj:    upgrade.cpp environ.hpp get_switch.hpp

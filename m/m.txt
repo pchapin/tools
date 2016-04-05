@@ -1,0 +1,292 @@
+                              Menu
+                    Configurable Menu Manager
+                          Version  2.5
+
+
+Introduction:
+The MENU program reads a "menu definition file" (MDF) and
+displays menus based on what it finds in that file. The MDF
+defines a main menu and, optionally, additional menus that can be
+reached from the main menu or from each other.
+
+Each menu item has a descriptive part and an action part. The
+descriptive part appears on the menu while the action part is not
+visible to the user. The action part can be any command
+understood by COMMAND.COM. In other words, any command that can
+be typed at the MS-DOS prompt can be used as a menu item action.
+When the user selects a menu item (using one of the function
+keys) the corresponding action is executed. Additionally, the
+color of each menu is determined by data in the MDF.
+
+This document describes how MENU is used. It also details the
+format of the MDF. Example MDFs, named M1.DEF through M6.DEF are
+also provided. The examples make no assumptions about your disk
+configuration -- they should work normally on any reasonably
+configured machine.
+
+The executable form of this program, as well as this document are
+placed into the public domain by myself, the author. The source
+code is copyrighted. I welcome comments and/or bug reports. I can
+be reached as in
+
+     Peter Chapin
+     P.O. Box 317
+     Randolph Center, VT 05061
+     chapinp@vscnet.bitnet
+
+
+Usage:
+The menu program is invoked as in
+
+     MENU menu.def
+
+Where "menu.def" is the name of the MDF. An MDF filename must be
+provided. If the name of an MDF file is not given on the command
+line, MENU will get for an environment variable named "MDF". If
+found, that environment variable defines the name of the MDF
+file.
+
+Note that the MDF filename can be qualified with drive specifiers
+and path names. MENU reads the entire MDF at once and closes it
+before proceeding. As a result there should be no complications
+if menu actions change default drives and/or directories.
+
+Of the several menus that may be defined in the MDF, MENU treats
+the first as the "Main Menu". It is this menu that is displayed
+when the program starts and it is distinguished from the others
+by the double line border. If the ESCape key is pressed when the
+Main Menu is visible, the program will terminate. If the ESCape
+key is pressed when one of the other menus is visible, the Main
+Menu will become the active menu.
+
+A menu item can be selected by striking the appropriate function
+key. If a menu item is followed by an ellipsis ("..."), selecting
+the item will bring you to another menu rather than execute a
+command.
+
+There is no way for the you to pass a parameter to the selected
+command. If commands need parameters, they must be built into the
+MDF.
+
+
+Menu Definition File Format:
+The MDF is a plain text file. It cannot be empty. MENU expects at
+least one menu definition in the file.
+
+Menu definitions consist of at least two lines followed by a '#'
+at the beginning of the next line after the menu definition. The
+first line of the menu definition is the menu's title. This title
+is displayed at the top of the menu. It can be of any desired
+length (within reason).
+
+The second line of the menu definition file defines the color of
+the menu. This line consists of color words separated by spaces,
+'+', or '|' characters. The recognized color words are:
+
+          Foreground     Background
+          ----------     ----------
+          white          rev_white
+          black          rev_black
+          red            rev_red
+          blue           rev_blue
+          green          rev_green
+          cyan           rev_cyan
+          magenta        rev_magenta
+          brown          rev_brown
+
+          bright
+          blinking
+
+Notice that the foreground and background colors are controlled
+with separate words. Notice also that it is possible to specify a
+bright or blinking foreground. If "blinking" is specified, only
+the border of the menu will blink. Menu text never blinks.
+
+The order and case of the color words is not important.
+Additionally, the default color is "black rev_black"; if only one
+of the colors is specified the other will be the default.
+Finally, unrecognized color words are simple ignored. For
+example...
+
+"white rev_red"     White text on a red background.
+"blue"              Blue text on a black (default) background.
+"rev_white"         Black (default) text on a white background.
+"yellow bright"     Bright yellow on a black background.
+"white Hi there!!"  White text on a black background.
+
+After the title and color definition, additional lines define the
+menu items. Each line is divided into a description field and an
+action field by the first '!' character. Both fields must be
+present for each item. The description field is displayed on the
+menu and can be any desired text (no '!' of course). The action
+field is, normally, the command to be executed when the item is
+selected by the user. It can be any string meaningful to
+COMMAND.COM for the given computer. For example...
+
+"Format Disk!format a: /v/s"       Formats disk with options.
+"WordPerfect!c:\wp\wp"             Starts WordPerfect.
+"Directory Listing!dir | more"     I/O redirection no problem.
+"Lotus 1-2-3!123.bat"              Batch files no problem.
+"Free $$$!echo Not implemented!"   An '!' ok in action part.
+
+If the first character of an action is a '*' character, then MENU
+will terminate right after the action is performed. For example
+
+"Logout!*logout"
+
+will terminate MENU after the logout program executes.
+
+If the first character of an action is a '+' character, then MENU
+will pause after the action is performed and wait for a
+keystroke. This is to allow the user to see the screen. Normally,
+MENU clears the screen and redisplays the current menu
+immediately after an action executes. For example
+
+"Format Disk!+format a:"
+
+will allow the user to see any messages the format program
+produces before menu clears the screen, etc.
+
+Some of the menu items may refer to other menus. The action
+associated with such items are called "at-actions". If the first
+character of an action is a '@', then MENU treats it as an at-
+action. What follows the '@' is the title of the next menu. For
+example...
+
+"Utilities!@Utility Menu"          Look up Utility Menu.
+
+Note that when an item contains an at-action, MENU automatically
+adds a "..." to the description when that item is displayed.
+There is no need to add the "..." in the MDF.
+
+MENU searches the definitions in the MDF from top to bottom
+looking for the one with the correct title. It is very important
+that the title specified in the at-action is EXACTLY the same as
+the title used in the menu definition. If MENU cannot find the
+title, selecting the action has no effect.
+
+At the very end of the file, just after the '#' which marks the
+end of the last menu definition, there must be a '*' as the first
+character on the next line. If MENU does not find such a
+character, it will assume that there is another menu definition
+in the file and will generate the "Unexpected <EOF>" error
+message. Note that there can be text between the '*' and the true
+end of the file. Such text is ignored by MENU and could be used
+for comments.
+
+MENU can also conditionally process sections of the menu
+definition file depending on the state of the environment
+variable MENUTYPE. For example, MENUTYPE might be set to STUDENT
+in AUTOEXEC.BAT or in a network login script.
+
+Any line that begins with an '=' character marks the beginning of
+a conditionally processed set of lines. For example
+
+...
+=STUDENT
+...   Lines processed only if MENUTYPE has a value STUDENT
+=
+...   Lines processed for everybody.
+
+Notice that there can be no spaces after the '=' and before the
+symbol name. The name is compared with the environment variable
+in a case sensitive manner. That is, if MENUTYPE is set to
+"student", lines begining with "=STUDENT" will be skipped.
+
+The special symbol "=NULL" defines lines that will be processed
+if MENUTYPE is not defined at all. This feature is sometimes
+useful for setting up default cases.
+
+MENU also checks the value of the environment variable named
+MENUENV. Lines in the MDF file that start with a '$' character
+are handled in a manner similar to that described for MENUTYPE
+above. The intent of this is too allow a menu to be different
+depending on the machine it's run.
+
+For example, in a networked environment, a single MDF file might
+apply to all users on all machines. The MENUTYPE control lets you
+define variations on the basic menu based on a user's
+classification. MENUTYPE might be set in the user's login script.
+The MENUENV control lets you define variations on the basic menu
+based on the workstation at which the user logs in. MENUENV might
+be set in AUTOEXEC.BAT for the special workstation.
+
+Long Menus:
+There are two variations on this program. They differ in the way
+the menu is displayed, the way the user selects a menu item and
+the number of menu items that are allowed. The short menu version
+draws the menu in the center of the screen, lets the user select
+items with the function keys, and can only handle 10 items per
+menu. The long menu version draws the menu over the entire
+screen, lets the user select items by typing the item number at a
+prompt, and handles 23 items per menu.
+
+The long version does not print any credits either. Thus if you 
+launch the long version from the short version, it returns
+"cleanly" to the short version. Everything appears to act as if
+it was one program.As a complete example, consider the following menu definition
+file. My comments appear inside '[..]' and are not part of the
+MDF.
+
+
+Main Menu                     [Title of main menu]
+bright white+rev_blue         [Bright white on a blue background]
+Item #1!echo Execute Item #1
+Item #2!echo Execute Item #2
+Item #3!@Menu #1              [Must specify exactly as below]
+Item #4!@Menu #2
+Item #5!@Setup Menu (Caution!)
+=ABC                          [This demos conditional handling]
+ABC Selected!+echo ABC
+=XYZ
+XYZ Selected!+echo XYZ
+=NULL
+MENUTYPE not set!+echo No MENUTYPE
+=
+Use DOS!command
+#                             ['#' Marks end of menu definition]
+Menu #1
+blinking green
+Sub-Item #1!echo Execute Sub-Item #1
+Goto Menu #2!@Menu #2         [Any menu can go to any other]
+#
+Menu #2
+black rev_white
+Sub-Item #1!echo Execute Sub-Item #1
+Sub-Item #2!echo Execute Sub-Item #2
+#
+Setup Menu (Caution!)
+blinking bright white rev_red
+Format Hard Drive!echo not really!
+Configure Hardware!echo not really!
+Run System Tests!echo not really!
+#                             [Marks end of last menu definition]
+*                             [Tells MENU that there is no more]
+This silly menu system set up by   [Comments ignored by MENU]
+Peter Chapin May 1, 1989
+<EOF>                         [True end-of-file]
+
+Limits:
+This version of MENU can handle a maximum of 10 menus. In
+addition, each menu can handle a maximum of 10 menu items. The
+number of menu items is partially limited by the screen layout.
+To deal with more than 10 items per menu, the menus would have to
+look substantially different.
+
+The total number of characters used to define all menus must be
+less than around 4K.
+
+Finally, the longest line that can be in the MDF is 128 bytes.
+
+Note that number of menus that can be used can be increased by
+adjusting the value of N_MENUS in the source code and
+recompiling.
+
+
+Error Messages:
+The error messages generated are self explanatory and won't be
+repeated here.
+
+Most error messages produced by MENU occur while it is reading
+the menu definition file. Once the main menu is displayed, there
+is little likelihood of the program going wrong.

@@ -1,0 +1,60 @@
+
+
+
+
+
+
+                                       BRACKET
+
+          This program accepts a C/C++ language source file through its
+          standard input and examines it for problems with {}, (), and []
+          nesting. It will print the program, with messages, to its
+          standard output.
+
+          The program prints a warning message after each '}' that closes
+          off a function (or file scoped struct declaration or initialized
+          array). It prints error messages for several type of mismatched
+          {}, (), and [] errors. The messages are printed as close to the
+          source of the error as possible (the actual error will always be
+          above the message). The messages are in bold. This requires that
+          ANSI.SYS be installed.
+
+          The program notices unclosed comments, literals, or {...} pairs
+          at the end of the file. The message produced by the program may
+          be more useful than the "Unexpected EOF" message produced by many
+          compilers.
+
+          The program correctly disregards material inside of comments or
+          literals. This includes many "pathalogical" examples missed by
+          other public domain programs. It understands both C and C++
+          comments.
+
+          This program is placed into the public domain by its author,
+          Peter Chapin. I welcome comments or bug reports. I can be reached
+          as in 
+
+               Peter Chapin
+               P.O. Box 317
+               Randolph Center, VT 05061
+               chapinp@vscnet.bitnet
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                                          1

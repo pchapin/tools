@@ -1,0 +1,23 @@
+
+.SUFFIXES:	.cpp
+
+OBJS = get_switch.o upgrade.o
+
+# =====
+# The following are for gcc on a Linux box...
+# =====
+.cpp.o:
+	g++ -g -c -I../../Common $<
+
+upgrade:         $(OBJS)
+	g++ -g -o upgrade $(OBJS)
+
+clean:
+	rm -rf core *.o *~ upgrade
+
+#############################################################################
+# Module dependencies
+
+get_switch.o:	../../Common/get_switch.cpp ../../Common/get_switch.hpp
+
+upgrade.o:      upgrade.cpp ../../Common/environ.hpp ../../Common/get_switch.hpp

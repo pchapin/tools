@@ -1,0 +1,35 @@
+Main Menu
+bright white+rev_blue
+Item #1!echo Execute Item #1
+Item #2!echo Execute Item #2
+Item #3!@Menu #1
+Item #4!@Menu #2
+Item #5!@Setup Menu (Caution!)
+=ABC
+ABC Selected!+echo ABC
+=XYZ
+XYZ Selected!+echo XYZ
+=NULL
+No MENUTYPE defined!+echo NONE
+=
+Use DOS!command
+#
+Menu #1
+blinking green
+Sub-Item #1!echo Execute Sub-Item #1
+Goto Menu #2!@Menu #2
+#
+Menu #2
+black rev_white
+Sub-Item #1!echo Execute Sub-Item #1
+Sub-Item #2!echo Execute Sub-Item #2
+#
+Setup Menu (Caution!)
+blinking bright white rev_red
+Format Hard Drive!echo not really!
+Configure Hardware!echo not really!
+Run System Tests!echo not really!
+#
+*
+This silly menu system set up by
+Peter Chapin May 1, 1989

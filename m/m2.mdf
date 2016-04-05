@@ -1,0 +1,21 @@
+Main Menu
+bright white+rev_blue
+Item #1!echo Execute Item #1
+Item #2!echo Execute Item #2
+Item #3!@Menu #1
+Item #4!@Menu #2
+Item #5
+#
+Menu #1
+blinking green
+Sub-Item #1!echo Execute Sub-Item #1
+Goto Menu #2!@Menu #2
+#
+Menu #2
+black rev_white
+Sub-Item #1!echo Execute Sub-Item #1
+Sub-Item #2!echo Execute Sub-Item #2
+#
+*
+
+

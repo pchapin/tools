@@ -1,0 +1,6 @@
+menu.c
+get_key.c
+scr.c
+scrcent.c
+scrdrawb.c
+scrgets.c

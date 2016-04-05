@@ -1,0 +1,8 @@
+system nt
+name upgrade.exe
+option map
+libpath %WATCOM%\lib386
+libpath %WATCOM%\lib386\nt
+library clib3r.lib
+file get_switch.obj
+file upgrade.obj

@@ -1,0 +1,104 @@
+.cm Text format program:  Documentation
+.cm Source  : roff.doc
+.cm Version : January 1990. Original extensively modified by Peter Chapin.
+.cm
+.cm
+.pl 66 Page length for regular computer paper at 6 LPI
+.rm 75 Right margin set for better centering at 8 CPI
+.in 10 Indent set for three hole punch.
+.cm Note that comments may be appended to commands expecting numbers
+.he ROFF:  USER'S GUIDE
+.fo Page #
+.ce 2
+Introduction
+************
+
+     This document tells you how to use "roff", a text formatting
+program.  Roff is a program in the spirit of the unix nroff text
+formatter.  The program allows nice looking documents to be produced
+with using a word processor and thus dealing with the word processor's
+special file format. 
+
+     This particular formatter lacks many of the features expected of a
+commercial word processor (and the full nroff formatter).  Nevertheless,
+it contains features useful in producing software documentation.  It is
+nice to be able to edit such documentation using a text editor while
+editing the software itself in a different window.  This is the intended
+usage of this program. 
+
+     The roff program accepts a file of text interspersed with
+formatting commands.  These commands reside on a line by themselves and
+always start with a "." character.  Immediately after the dot is the two
+character (lower case) name of the command.  The roff program produces
+an output file which contains the formatted text with all the commands
+stripped.  The output file can then be printed using an editor or the
+DOS type command. 
+
+.sp 4
+.ce 2
+ROFF  Commands
+**************
+
+     Roff commands are instructions to the roff program telling the
+program how to arrange text on a page.  Any line which begins with a
+period in the first column is assumed to be a command line.  Roff
+commands all consist of two letters which immediately follow the
+beginning period.  Unknown commands, as well as commands in upper case,
+are ignored.  You can translate commands to upper case if you want to
+temporarily disable a command: they won't be recognized. 
+
+     Most commands can accept arguments.  If the argument is preceded by
+a plus or minus sign, then the argument changes the internal value by
+the argument amount.  Otherwise, the internal value is set to the value
+of the argument.  For example, the command .ls 2 sets the line spacing
+to 2, while the command .ls +2 increases the line spacing by 2 lines. 
+
+     Here is a list of the roff commands.  It is assumed you have some
+experience using similar text formatters because the description of what
+these commands do is sketchy. 
+
+.nf
+.bp
+.sp 4	Space down 4 lines.
+.ce 2
+ROFF Command Summary
+********************
+
+ Command     Break?     Default     Action
+ ----------  ---------  ----------  --------------------------
+ .bp         yes                    Begin next page
+ .br         yes                    Cause break
+ .ce n       yes        n=1         Center next n lines
+ .cm         no                     Comment
+ .fi         yes                    Start fill mode (default)
+ .fo         no         empty       Footer title
+ .he         no         empty       Header title
+ .in n       no         n=0         Indent n spaces
+ .ls n       no         n=1         Set line spacing=n
+ .nf         yes                    Stop fill mode
+ .pl n       no         n=66        Set page length=n
+ .rm n       no         n=60        Set right margin=n
+ .sp n       yes        n=1         Space down n lines
+ .ti n       yes        n=0         Temp indent n spaces
+.fi
+
+     A break stops the filling of the current line.  Breaks are needed
+between paragraphs.  Lines containing nothing but blanks always cause
+one blank line to be output. 
+
+     A line which starts with a tab or blank causes the temporary indent
+setting to be set to the number of beginning spaces on that line.  Note
+that this feature overrides any .ti setting in effect.  Additionally,
+this causes a break to occur.  Thus a line starting with blanks or a tab
+will force a new paragraph.  
+
+.sp 4 
+.ce 2
+How To Run This Program
+***********************
+
+     To run this program just type "roff" followed by a filename.  The
+formatted output is writin to standard output.  If no filename is
+specified, the input is taken from standard input.  This allows roff to
+be used at the end of pipe if desired. 
+

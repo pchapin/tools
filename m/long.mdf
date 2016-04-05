@@ -1,0 +1,14 @@
+Long Menu
+white
+This is an entry on the long menu.!+echo First entry.
+This is another entry on the long menu.!+echo Second entry.
+=FACSTAFF
+This is faculty Staff entry.!+echo Faculty/Staff.
+=
+$NULL
+This entry appears if there is no MENUENV.!+echo No MENUENV.
+$ENV1
+This entry appears if MENUENV == ENV1.!+echo MENUENV = ENV1.
+$
+#
+*

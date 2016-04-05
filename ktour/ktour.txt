@@ -1,0 +1,305 @@
+                             Knight's Tour
+                      An Exercise in Optimization
+
+                    by Peter Chapin & David Leonard
+                            December, 1988
+
+
+Introduction:
+-------------
+
+This classic chess problem is often discussed in programming classes as
+an example of searching a tree using recursion. The simple "first
+generation" program has, however, very poor performance. The size of the
+tree involved in the knight's tour problem is very large, and a straight
+forward program that makes an exhaustive search of that tree will tax
+the patience, not to mention the life span, of any user.
+
+During the past several months we've been looking at this problem off
+and on, using various languages, in our spare time. Our best effort so
+far can find a solution for the 8x8 board in a few seconds---even on a
+4.77 MHz 8088 machine.
+
+Although the knight's tour problem itself has no great significance, the
+act of producing our high performance program proved to be very
+educational for us. It is our intention in this article to share with
+you some of our observations. We hope you find them useful as well.
+
+
+The Problem:
+------------
+
+To do a knight's tour you must start with an empty chessboard. The tour
+begins by placing the knight on an arbitrarily chosen square. The
+problem is to move the knight so that it visits every square on the
+chessboard exactly once. Notice that in our definition of the problem,
+it is not required for the knight to be able to reach its initial square
+from its final square. In other words, the tour does not have to form a
+loop.
+
+
+The Solution:
+-------------
+
+As the problem is solved, the knight descends a tree of board
+configurations. At each node in the tree, the knight has up to eight
+moves to consider. Some of the moves are illegal because they would take
+the knight to a square that is off the board or that it has already
+visited. A leaf in the tree occurs when there are no legal moves that
+the knight can make. Under such circumstances, the knight must back up
+to a previous position (node) and try a different move from that
+previous position. If the knight has already tried all moves from the
+previous position, it must back up to the position before that, etc.
+Notice that a solution is a special kind of leaf.
+
+The most naive solution is shown in listing one [sorry: not included!].
+Here the work is done by the function search(). Search() positions the
+knight at the coordinates x,y and then checks to see if it solved the
+problem. If the problem is not solved, search() then tries to move the
+knight to each of its legal moves, calling itself to continue the
+process at the next level in the tree. When finished, search() "backs
+up" by taking the knight off the board and returning up a level.
+
+Note that this program conducts an exhaustive search of the tree and
+would thus find every solution that existed. In a "real" program, the
+function handle_sol() would probably print the solution to the screen or
+take other similar action.
+
+Note the technique used to print the information line. If the line is
+printed too often, it would severely degrade the program's performance.
+A more typical method to control when it is printed would be:
+
+     if (!(nmbr_pos % 65536L)) printf("etc...");
+
+This implies, however, that a very expensive division of longs is done
+at each step. A smart compiler might use a masking operation. However,
+on the 8088 even masking longs is relatively involved. We did not want
+our timings to be unduly influenced by such "extra" operations. Our
+method involves just decrementing an unsigned and testing it against
+zero.
+
+The performance of the program in listing one is poor to say the least.
+The timings reported in this article were all collected (unless
+otherwise noted) on an 8 MHz 8088 machine. Turbo C version 1.5 was used
+to test the programs. The large memory model was used and the compiler
+was told to optimize for speed. In particular, the programs were
+compiled with the -G (favor speed) and -O (do jump optimizations)
+options. All of the runs, unless otherwise noted, were done on a full
+sized (8x8) board with the knight starting at row 1, column 1.
+
+Turbo C managed to process 1060 boards/sec (timed for the first minute).
+It could not find any solutions even after extended runs (on the order
+of days). Of passing interest, we noted that using the small memory
+model for this program yielded a 50% speed improvement over the large
+model.
+
+
+Improving Version One:
+----------------------
+
+There are three general approaches to improving our program's
+performance: a) search the tree faster; b) search the right part of the
+tree first; and c) search less of the tree. Method (b), does not
+actually speed the overall execution; however, it may reduce the amount
+of time required to find the first solution. In practice, one is often
+interested in any solution, thus method (b) is  worth consideration.
+
+With regard to method (a), there are several things the program in
+listing one does that are slow.
+
+ --  It calls the function get_moves() to calculate the coordinates of
+     the moves the knight can make. Each time the knight visits a
+     square, even if it has visited it before, the legal moves are
+     freshly calculated.
+
+ --  It does five tests to see if the square under consideration is on
+     the board and unvisited. Because the knight frequently tries to
+     move onto the board, all of the tests are often executed for each
+     tentative move.
+
+ --  It indexes into a two dimensional array of ints. This involves an
+     expensive multiply instead of the shift that is usually required
+     indexing into a one dimensional array of ints.
+
+ --  It passes two parameters into a recursive function. This requires a
+     lot of stack manipulation.
+
+All of the above problems can be eliminated by precalculating an
+appropriate data structure. The precalculation is done once during the
+initialization phase of the program rather than recalculating the same
+data at each step.
+
+The program in listing two [sorry: not included!] implements the
+improvements. Associated with each square is a struct containing two
+members. The first member has the same significance that the elements of
+board[][] did in the program of listing one. The other member contains a
+list of pointers to the squares that can be reached from the given
+square. The last pointer in the list is NULL.
+
+The algorithm used by the program in listing two is identical to that
+used by the earlier program. In fact, both programs search the tree in
+exactly the same way. However, because of the precalculated linkages,
+the program in listing two: a) never uses get_moves() once it has begun
+searching; b) does only one test rather than five to validate an
+upcoming move; c) never indices into an array; and d) passes only one
+parameter recursively rather than two.
+
+Notice that precalculating linkages is more convenient in C than in most
+other (high level) languages because C is one of the few languages that
+allow you to take the address of a previously declared piece of data. In
+fact, the array board[][] could have been initialized with the pointers
+at compile time, saving even the precalculation step.
+
+Timings showed, as expected, a very significant improvement in
+performance. Turbo C managed 3710 boards per second. This represents a
+speed up factor of 3.5. However, this was not large enough to bring
+solutions into reach. The program could not find any solutions---even
+after extended runs.
+
+
+Removing the Recursion:
+-----------------------
+
+Both of the earlier programs used recursion. For a problem of this
+nature, recursion is a natural choice. However, it's often assumed that
+recursion is inherently slower than non-recursive methods. Since any
+recursive method can be rewritten non-recursively, it would seem
+worthwhile to rewrite version two in a non-recursive form.
+
+The program in listing three(A) [sorry: not included!] shows an
+implementation which does not use recursion. Notice that although
+search() is no longer recursive, it is also much more complicated. This
+is a typical result when one uses a control method that is not natural
+for the problem.
+
+The performance of the program in listing three(A) is disappointing.
+Turbo C only processed 2340 boards per second. This is only 63% of the
+performance obtained with the previous program! In an effort to improve
+the performance, an unstructured version was tested (see listing
+three(B) [sorry: not included!]). The unstructured version has fewer
+tests since it does not need the auxiliary variables "done" and
+"move_found". However, the unstructured version didn't do much better:
+2570 boards per second.
+
+The results are not surprising when one considers the recursive process
+in more detail. The non-recursive version needs to keep two pieces of
+extra data around for each square: a pointer to the previous square and
+a pointer to tell us which of the set of possible next squares we've
+used. These new data must be manipulated explicitly by our program in
+addition to the manipulations from before.
+
+Of course, the program in listing three does not incur function call
+overhead since it is not recursive. However, that function call
+"overhead" involves manipulating, automatically, the very data we had to
+manipulate explicitly. The frame pointer that is pushed onto the stack
+at each entry into the recursive search() plays the role of back_link.
+The local variable trial_move in the recursive search() plays the role
+of step.
+
+In short, the non recursive version just moved data from the stack,
+where it was in the recursive version, to the array board[][]. Since the
+compiler is responsible for automatically manipulating the data on the
+stack, it is not surprising to find that it can do so efficiently.
+
+Although our result contrasts with what is often thought about
+recursion, we believe that it is due entirely to the nature of the
+problem. Searching a tree fits the recursive method so naturally that
+the function call "overhead" becomes a meaningful part of the program's
+control structure and thus not overhead at all!
+
+
+Searching the Right Place:
+--------------------------
+
+Although the program in listing two processes board configurations at a
+much greater rate than the program in listing one, it still does not
+find solutions very quickly. A possible explanation for this becomes
+clear when one tries to solve the knight's tour by hand.
+
+It quickly becomes apparent that without care, squares develop that are
+cut off from the knight. Since these isolated squares can never be
+reached, no solution is possible. If the isolation occurs at a
+relatively high level in the tree, the program will labor for long
+periods investigating paths that can't possible have solutions.
+
+Isolations tend to occur most easily in the corners and along the edges
+where the number of options that the knight has is small. Humans, when
+solving the problem, will almost always start by moving the knight
+around the perimeter of the board. By thus "filling in" the edges of the
+board the problem effectively reduces itself to doing a knight's tour on
+a smaller board.
+
+We encouraged the knight to enter corners early and hug the edge of the
+board by sorting the pointers in the member array next[] to favor
+squares toward the edge of the board. Even the interior squares were
+thus predisposed to maintain the edge hugging behavior when the edge
+squares had been completely used.
+
+It's important to note that once the sorting is complete, the algorithm
+runs with no speed penalty. This is another advantage, although a more
+subtle one, to using precalculated data: information about the problem
+can be imbedded in the data without increasing the size (and reducing
+the speed) of the program that uses that data.
+
+One might argue that our trick does not guarantee that isolations won't
+occur. This is true and, in fact, we later discuss a version that does
+lock out isolations. Nevertheless, since the idea doesn't cost anything
+in terms of boards processed per second, it seems reasonable to give it
+a try before starting to trade in speed for sophistication.
+
+The program in listing four [sorry: not included!] implements the idea
+by sorting the member arrays during the initialization phase. This is
+done using the library function qsort(). Qsort() requires a pointer to a
+function to compare the things we want sorted. We are sorting struct
+square pointers, but the comparison is fairly involved since we are
+really interested in the positional significance of the squares pointed
+at by the pointers rather than the addresses stored in the pointers
+themselves.
+
+{ This document is unfinished! The version of KTOUR provided with this
+document prevents isolations from occurring. It solves the 8x8 problem
+very rapidly and can do larger boards. }
+
+Conclusion:
+-----------
+
+     To summarize our observations:
+
+ --  Precalculate as much data as possible.
+
+     Ideally, the program would never have to calculate information that
+     it calculated at some earlier time. Although this greatly increases
+     the amount of memory required by the program, it can have a very
+     substantial effect on its speed performance.
+
+  -- Recursion is not necessarily slow.
+
+     For problems, such as searching a tree, where recursion is the most
+     natural approach, there may be no advantage in seeking non-
+     recursive methods. The stack manipulation done to implement the
+     function calls contributes to the program's control and data in a
+     meaningful fashion. Efforts to remove the recursion will prevent
+     you from taking advantage of you compiler's abilities to manipulate
+     the stack efficiently.
+
+ --  Embed information about the problem in the data.
+
+     When precalculated data is used, try to build as much information
+     about the problem as possible into that data. This will give the
+     program hints without doing any major run time analysis.
+
+ --  Add expensive analysis stages carefully.
+
+     When static, precalculated data can't embed enough information
+     about the problem, run time analysis must be added. However, you
+     should probably add such analysis conservatively so that peak
+     performance is not overstepped.
+
+ --  Assembly language as a last resort.
+
+     Replacing critical functions in a C program with assembly language
+     routines may help performance. However, the biggest benefit from
+     using assembly language comes from streamlining the interfaces
+     between modules/functions. Thus if C is not enough, a total rewrite
+     in assembly language may be needed; replacing modules may not be
+     enough either.

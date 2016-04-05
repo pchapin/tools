@@ -1,0 +1,257 @@
+
+
+
+
+
+
+
+
+
+
+
+
+                                   SCRTOOLS
+                                Screen Toolkit
+                                ==============
+
+                      (C) Copyright 1990 by Peter Chapin
+
+                          Revision: February 4, 1991
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+          Peter Chapin
+          P.O. Box 317
+          Randolph Center, VT 05061
+
+
+
+
+
+
+     SCRTOOLS Documentation                                February 4, 1991
+
+
+
+                                 Introduction
+                                 ------------
+
+          The functions  in this package are designed to suplement those in
+     the SCR package. These functions are  at a  slightly higher  level and
+     are more specialized. These functions depend on SCR, and only SCR, for
+     all the  low  level  I/O.  These  functions  could  be  ported  to any
+     environment provided SCR.C was adjusted.
+
+
+                                   Features
+                                   --------
+
+       *  Box drawing.
+
+       *  Input function with editing abilities.
+
+       *  Centering lines of text.
+
+
+                                  Conventions
+                                  -----------
+
+          Read the  documentation for  the SCR  package. Screen regions and
+     attributes are defined the same way for this package as for SCR. 
+
+
+                              Available Functions
+                              -------------------
+
+     void ScrCenter(int Row, int Col, int Width, char *Text, int Attr);
+          This function centers the 'Text' on the specified row. It centers
+          the text  in a  region of the specified width which starts at the
+          specified column. If the  text  is  longer  than  the  width, the
+          first character  of the  text will  start at the specified column
+          and the text will  be  truncated.  Note  that  the  text  will be
+          displayed  using   the  specified  attribute  regardless  of  the
+          attribute already on the screen.
+
+     void ScrDrawBox(
+       int Row, int Col, int Width, int Height, int Box_Type, int Attr
+       );
+          This function draws rectangular  boxes on  the screen.  The width
+          and height include the boxes boundary. The box type can be one of
+          the following:
+
+               SCR_DBL_LINE        Double line.
+               SCR_SNGL_LINE       Single line.
+
+                                                                          1
+
+
+
+
+
+     SCRTOOLS Documentation                                February 4, 1991
+
+               SCR_DARK_GRAPHIC    Fine graphic.
+               SCR_LIGHT_GRAPHIC   Course graphic.
+               SCR_SOLID           Solid graphic.
+               SCR_ASCII           ASCII characters.
+               SCR_BLANK_BOX       Spaces.
+
+          The attribute applies  only  to  the  boundary  of  the  box. The
+          interior of the box is unaffected.
+
+
+     int ScrGets(int Row, int Col, char *Buffer, int Length, int Attr);
+          This  function  allows  the  user  to  enter  characters from the
+          keyboard. The cursor is moved to the specified row and column and
+          any initial  contents of  the specified buffer are displayed. The
+          function allows the user to enter characters at the keyboard. The
+          characters are  displayed using 'Attr'. The characters are placed
+          into the buffer which  remains  null  terminated.  There  must be
+          space in the buffer for the specified number of characters plus a
+          null byte. In other words the buffer must  be Length+1 characters
+          long.
+
+          If the  initial buffer contents are longer than length, ScrGets()
+          will insert a null byte  into  the  buffer  to  truncate  it. The
+          entire buffer  length is  displayed (in  'Attr') to the user. The
+          user may edit the string that s/he is  entering according  to the
+          following keys.
+
+          HOME           Move cursor to start of buffer.
+          END            Move cursor to end of buffer.
+          LEFT ARROW     Move cursor to the left one position in buffer.
+          RIGHT ARROW    Move cursor to the right one position in buffer.
+          BACKSPACE      Delete character to left of cursor. Close gap.
+          DEL            Delete character under cursor. Close gap.
+          Cntrl-PGUP     Erases buffer.
+          Cntrl-PGDWN    Erases buffer.
+          Normal key     Insert character.
+
+          When the  user is  satisfied, s/he  can strike  the return key to
+          exit the function. The  return key  can be  used with  the cursor
+          anywhere in the buffer. A '\n' character is not inserted when the
+          user strikes the return key. In addition, the  user can terminate
+          by striking  the ESC  key. In this case, the original contents of
+          the buffer are returned to the calling program. Finally, the user
+          can terminate by striking the TAB key. The effect in this case is
+          identical with that of the return key.
+
+          The function ignores as  many  illegal  things  as  it  can. Only
+          printable   characters   (true   ASCII  characters  that  satisfy
+          isprint()) are allowed in the buffer. Control-C is ignored during
+          the input).
+
+                                                                          2
+
+
+
+
+
+     SCRTOOLS Documentation                                February 4, 1991
+
+
+          The function returns either K_RETURN, K_ESC, or K_TAB (as defined
+          in get_key.h) depending on which method was used to terminate.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                                          3
+
+
+
+
+
+                                      SCRTOOLS
+                                Quick Reference Card
+                                ====================
+
+     Symbolic Names:
+     ---------------
+     SCR_DBL_LINE        SCR_SNGL_LINE       SCR_DARK_GRAPHIC    /* Box types */
+     SCR_LIGHT_GRAPHIC   SCR_SOLID           SCR_ASCII
+     SCR_BLANK_BOX
+
+     Available Functions:
+     --------------------
+     void ScrCenter(int Row, int Col, int Width, char *Text, int Attr);
+     void ScrDrawBox(
+       int Row, int Col, int Width, int Height, int Box_Type, int Attr
+       );
+     int ScrGets(int Row, int Col, char *Buffer, int Length, int Attr);
+
+
