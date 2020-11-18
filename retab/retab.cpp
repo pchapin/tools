@@ -57,7 +57,7 @@ using namespace std;
 #define QUOTE       1       //  Quoted string skip state.
 #define BLANK       2       //  Blank parsing state.
 
-char *usage[]={
+const char *usage[]={
   "     This program  allows you  to insert  or delete  tabs in  a text file so",
   "that the file looks the same when the  tab stops  are changed.  This program",
   "can be  used to  remove all tabs from a file or to replace as many spaces as",
@@ -85,7 +85,7 @@ char *usage[]={
 };
 
 
-char *adjust_date( char *ANSI_date )
+char *adjust_date( const char *ANSI_date )
 {
     static char  buffer[13];
            char *buffer_pointer;
@@ -117,7 +117,7 @@ char *adjust_date( char *ANSI_date )
 
 void print_usage( )
 {
-    char **line;
+    const char **line;
     
     for( line = usage; *line; line++ )
         printf( "%s\n", *line );
