@@ -28,8 +28,8 @@ created.
 
 +   ktour
 
-    A sample program that solves the knight's tour chess problem. This isn't relevant to text
-    editors, exactly, but it's a fun little toy.
+    A sample program that solves the knight's tour chess problem. This isn't exactly a tool, but
+    it's a fun toy.
 
 +   look
 

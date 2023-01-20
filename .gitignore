@@ -36,5 +36,6 @@ _LINT.TMP
 
 # Executables
 depend/depend
-huff/huff
-huff/puff
+ktour/ktour
+makedirlist/makedirlist
+retab/retab

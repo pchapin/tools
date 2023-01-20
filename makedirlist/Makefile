@@ -1,13 +1,13 @@
 ############################################################################
 # FILE        : makefile
-# LAST REVISED: March 1999
+# LAST REVISED: January 2023
 # AUTHOR      : Peter Chapin
 #
 # This is the makefile for the makedirlist program.
 ############################################################################
 
 CC      = g++
-OPTIONS = -c
+OPTIONS = -c -Wall -std=c++11
 LIBS    = 
 
 # Implicit rules for converting source to object.
