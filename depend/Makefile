@@ -3,7 +3,7 @@
 #
 
 CXX=g++
-CXXFLAGS=-std=c++98 -c -Wall -O -I../../../Spica/Cpp
+CXXFLAGS=-std=c++98 -c -Wall -O -I../../Spica/Cpp
 LINK=g++
 LINKFLAGS=
 SOURCES=adjdate.cpp   \
@@ -16,7 +16,7 @@ SOURCES=adjdate.cpp   \
 	splits.cpp
 OBJECTS=$(SOURCES:.cpp=.o)
 EXECUTABLE=depend
-LIBSPICA=../../../Spica/Cpp/libSpicaCpp.a
+LIBSPICA=../../Spica/Cpp/libSpicaCpp.a
 
 %.o:	%.cpp
 	$(CXX) $(CXXFLAGS) $< -o $@
@@ -32,22 +32,22 @@ $(EXECUTABLE):	$(OBJECTS)
 
 adjdate.o:	adjdate.cpp misc.hpp 
 
-depend.o:	depend.cpp ../../../Spica/Cpp/environ.hpp filename.hpp filescan.hpp \
-	../../../Spica/Cpp/get_switch.hpp misc.hpp output.hpp record_f.hpp 
+depend.o:	depend.cpp ../../Spica/Cpp/environ.hpp filename.hpp filescan.hpp \
+	../../Spica/Cpp/get_switch.hpp misc.hpp output.hpp record_f.hpp 
 
-filename.o:	filename.cpp ../../../Spica/Cpp/environ.hpp filename.hpp 
+filename.o:	filename.cpp ../../Spica/Cpp/environ.hpp filename.hpp 
 
-filescan.o:	filescan.cpp ../../../Spica/Cpp/environ.hpp filename.hpp \
+filescan.o:	filescan.cpp ../../Spica/Cpp/environ.hpp filename.hpp \
 	filescan.hpp linescan.hpp 
 
-linescan.o:	linescan.cpp ../../../Spica/Cpp/environ.hpp filename.hpp filescan.hpp linescan.hpp \
+linescan.o:	linescan.cpp ../../Spica/Cpp/environ.hpp filename.hpp filescan.hpp linescan.hpp \
 	output.hpp 
 
 output.o:	output.cpp filename.hpp output.hpp 
 
-record_f.o:	record_f.cpp ../../../Spica/Cpp/environ.hpp misc.hpp record_f.hpp 
+record_f.o:	record_f.cpp ../../Spica/Cpp/environ.hpp misc.hpp record_f.hpp 
 
-splits.o:	splits.cpp ../../../Spica/Cpp/environ.hpp misc.hpp 
+splits.o:	splits.cpp ../../Spica/Cpp/environ.hpp misc.hpp 
 
 
 # Additional Rules
