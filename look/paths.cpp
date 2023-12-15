@@ -1,33 +1,32 @@
-/****************************************************************************
-FILE          : paths.cpp
-LAST REVISION : 2005-08-15
-SUBJECT       : Functions for file name path manipulation.
-PROGRAMMER    : (C) Copyright 2005 by Peter C. Chapin
+/*! \file   paths.cpp
+ *  \brief  Functions for file name path manipulation.
+ *  \author Peter Chapin <spicacality@kelseymountain.org>
+ */
 
-Please send comments or bug reports to
+#include <string>
+#include "environ.hpp"
 
-     Peter C. Chapin
-     Department of Electrical and Computer Engineering Technology
-     Vermont Technical College
-     Randolph Center, VT 05061
-     pchapin@ecet.vtc.edu
-****************************************************************************/
-
-#include <cstdlib>
-
+#if eOPSYS == ePOSIX
+#include <unistd.h>
+#else
 #include <direct.h>
-#include "paths.h"
+#endif
+#include "paths.hpp"
+
+namespace {
+    // This is probably in the library somewhere.
+    constexpr char path_separator = ( eOPSYS == ePOSIX ) ? '/' : '\\';
+}
 
 std::string find_absolute_path( const char *p )
 {
     std::string path( p );
 
     // If it's a relative path we have to do some work.
-    if( path.size( ) > 0 && path[0] != '\\' ) {
-        char *temp = getcwd( NULL, 0 );
+    if( path.size( ) > 0 && path[0] != path_separator ) {
+        char *temp = getcwd( nullptr, 0 );
         std::string workspace( temp );
         std::free( temp );
-
         path = workspace;
     }
     return( path );    

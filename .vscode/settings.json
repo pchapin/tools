@@ -1,0 +1,12 @@
+{
+    "makefile.makeDirectory": "Date",
+    "makefile.launchConfigurations": [
+        {
+            "cwd": "c:\\Projects\\Tools\\look",
+            "binaryPath": "c:\\Projects\\Cpp\\look\\look",
+            "binaryArgs": [ "look.cpp" ]
+        }
+    ],
+    "cSpell.words": [
+    ]
+}
